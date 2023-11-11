@@ -29,7 +29,7 @@ public class ParentRequestBodyAdvice extends RequestBodyAdviceAdapter {
   public Object afterBodyRead(Object body, HttpInputMessage inputMessage, MethodParameter parameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
     Child child = (Child) body;
     // given that we aren't able to deserialize into a String, we need to
-    Parent paregit ntId = child.parent();
+    Parent parentId = child.parent();
     Optional<Parent> parent = parentRepository.findById(parentId.id());
     if(parent.isEmpty()) {
       throw new NoParentException();
