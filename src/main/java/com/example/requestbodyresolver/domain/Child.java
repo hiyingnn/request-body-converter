@@ -8,6 +8,5 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Builder(toBuilder = true)
 public record Child(@Id String id,
                     String name,
-//                    @JsonDeserialize(converter = ParentJacksonConverter.class)
-                    Parent parent) {
+                    String parentId) {
 }

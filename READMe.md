@@ -97,3 +97,4 @@ public class ParentRequestBodyAdvice extends RequestBodyAdviceAdapter {
 - Docker Spring Boot 3.1:
   - https://softwaremill.com/do-you-still-need-testcontainers-with-spring-boot-3-1/
   - https://www.naiyerasif.com/post/2023/09/08/improved-local-development-using-containers-in-spring-boot-3-1/
+  - Note that does not work well with docker-compose: v2.23.0

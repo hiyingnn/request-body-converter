@@ -1,6 +1,7 @@
 package com.example.requestbodyresolver.controller;
 
 import com.example.requestbodyresolver.domain.Child;
+import com.example.requestbodyresolver.domain.Parent;
 import com.example.requestbodyresolver.repo.ChildRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,9 @@ public class ChildController {
     }
 
     @PostMapping("child")
-    public Child createChild(@RequestBody Child child) {
+    public Child createChild(Parent parent, @RequestBody @Reference(
+      idField = "parent"
+    ) Child child) {
       Child createdChild = childRepository.save(child);
       log.info("Child created {}", createdChild);
       return createdChild;
