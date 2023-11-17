@@ -28,9 +28,9 @@ public class ChildController {
     }
 
     @PostMapping("child")
-    public Child createChild(Optional<Parent> parent, @RequestBody @Reference(
-      idField = "parentId"
-    ) Child child) {
+    public Child createChild(@RequestBody @Reference(
+      idField = {"parentId"}
+    ) Child child, Parent parent) {
       Child createdChild = childRepository.save(child);
       log.info("Parent found {}", parent);
       log.info("Child created {}", createdChild);

@@ -25,7 +25,7 @@ public class ParentController {
   }
 
   @PostMapping("parent")
-  public Parent createChild(@RequestBody Parent parent) {
+  public Parent createParent(@RequestBody Parent parent) {
     return parentRepository.save(parent);
   }
 }

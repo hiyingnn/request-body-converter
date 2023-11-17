@@ -17,7 +17,7 @@ import java.util.Optional;
 
 
 @Aspect
-@Component
+//@Component
 @Slf4j
 @RequiredArgsConstructor
 public class AspectInjectParent {
@@ -35,9 +35,9 @@ public class AspectInjectParent {
     log.info(Arrays.toString(objects));
     for(int idx =0; idx < objects.length; idx++) {
       Object o = objects[idx];
-      if (o instanceof Optional) {
-        // due to erasure, can't double check that these are the right classes
-        objects[idx] = Optional.of(new Parent("sad", "alalla"));
+      if (o instanceof Parent) {
+        // due to erasure of Optional, can't use this
+        objects[idx] = new Parent("sad", "alalla");
       }
     }
     pjp.proceed(objects);
