@@ -6,6 +6,8 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAdapter;
 
 import java.lang.reflect.Type;
@@ -24,7 +26,8 @@ public class ParentIdRequestBodyAdvice extends RequestBodyAdviceAdapter {
   public Object afterBodyRead(Object body, HttpInputMessage inputMessage, MethodParameter parameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
     log.info(parameter.getParameterName());
     Reference reference = parameter.getParameterAnnotation(Reference.class);
-    log.info(reference.idField());
+    log.info("In Request Body Adapter");
+    RequestContextHolder.getRequestAttributes().setAttribute("parent", reference.idField(), RequestAttributes.SCOPE_REQUEST);
     return super.afterBodyRead(body, inputMessage, parameter, targetType, converterType);
   }
 }
