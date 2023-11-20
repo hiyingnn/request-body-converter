@@ -26,75 +26,68 @@
           }
       ```
 
-## Attempt 1 - Jackson Deserializer
-- Via extending a `StdConverter`
+## Complexities
+- While there are many resources on how to resolve a `@PathVariable`, our use-case is not very common:
+  - Reading from request body
+  - Generic approach:
+    - Fetch `referenceId` 
+    - Fetch/convert to domain object
+
+## Technical Approach
+
+### Read from request body
+We are only able to read from the input stream once. As such, if we want to read the request body multiple times, we have to cache (best during the filter). For now, we will need to read the input stream at least twice:
+
+1. Reqeust Body Advice (for the actual domain object)
+2. 1 time for each parent we want to fetch
+
+- As such, we will need to introduce:
+  - `CachedHttpServletRequest` and `CachedHttpBodyServletRequest` - extends the usual `ServletReqeust` 
+  - `ContentCachingFilter` - filter to cache
+
+## Generic approach - get reference
+To have a generic approach of getting the `id` field reference, we can introduce a `@Reference` annotation, with the `idField` containing the field of the reference.
+
 ```java
-@Component
-@RequiredArgsConstructor
-public class ParentJacksonConverter extends StdConverter<String, Parent> {
-
-  private final ParentRepository parentRepository;
-
-  @Override
-  public Parent convert(String id) {
-    return parentRepository.findById(id).orElseThrow(NoParentException::new);
-  }
-}
+   @PostMapping("child")
+    public Child createChild(
+            @RequestBody
+            Child child,
+            @Reference(
+            idField = "parentId"
+    ) Parent parent) {
+      Child createdChild = childRepository.save(child);
+      log.info("Parent found {}", parent);
+      log.info("Child created {}", createdChild);
+      return createdChild;
 ```
-- Declaring the parent to e deseralized as such:
-``` java
- @Document("child")
-  public record Child(@Id String id,
-  String name,
-  @JsonDeserialize(converter = ParentJacksonConverter.class)
-  Parent parent) {
-}
-```
-
-### Evaluation:
-1. Handling exceptions
-2. Responsibility of conversion
+We can then utilise an implementation of the `HandlerMethodArgumentResolver`, to do the following
+1. Obtain the request body via the cached `CachedHttpServletRequest`
+2. Use `JsonPath` to fetch the field, given the field in `@Reference` annotation
+3. Use `DomainClassConverter` to generically obtain the domain class
+   - Here, we also throw an exception if the parent cannot be found
 
 
-## Attempt 2 - `RequestBodyAdvice`
+## Generic approach - fetch and get domain object
+`DomainClassConverter` is a `spring-data` generic converter, which enables us to convert from an `id` to an `entity`.
+In the `HandlerMethodArgumentResolver`, we are also able to generically map it to the class, given the methodParameters' parameter type
 ```java
-@RequiredArgsConstructor
-@ControllerAdvice
-public class ParentRequestBodyAdvice extends RequestBodyAdviceAdapter {
-
-  private final ParentRepository parentRepository;
-
-  @Override
-  public boolean supports(MethodParameter methodParameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
-    return Objects.equals(targetType.getTypeName(), Child.class.getTypeName());
-  }
-
-  @Override
-  public Object afterBodyRead(Object body, HttpInputMessage inputMessage, MethodParameter parameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
-    Child child = (Child) body;
-    // given that we aren't able to deserialize into a String, we need to
-    Parent parentId = child.parent();
-    Optional<Parent> parent = parentRepository.findById(parentId.id());
-    Child updatedChild = child.toBuilder()
-      .parent(parent.get())
-      .build();
-    return updatedChild;
-  }
-}
+Class<?> clazz = methodParameter.getParameterType();
+Object foundReference = domainClassConverter.convert(referenceId, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(clazz));
 ```
-- This means that the request body must be more complicated:
-  - ```json
-    {
-    "name": "bob-child2",
-    "parent": {
-    "id": "654dd6a61045064756ed514f"
-    }
-    }
-  ```
 
-
+    
 ## Resources
 - Docker Spring Boot 3.1:
   - https://softwaremill.com/do-you-still-need-testcontainers-with-spring-boot-3-1/
   - https://www.naiyerasif.com/post/2023/09/08/improved-local-development-using-containers-in-spring-boot-3-1/
   - Note that does not work well with docker-compose: v2.23.0
+
+- Argument Resolver:
+  - https://www.petrikainulainen.net/programming/spring-framework/spring-from-the-trenches-creating-a-custom-handlermethodargumentresolver/
+  - https://medium.com/trabe/make-spring-mvc-work-for-you-injecting-custom-method-arguments-fc68934cabeb
+  - https://reflectoring.io/spring-boot-argumentresolver/
+
+- Cache request body: 
+  - https://www.baeldung.com/spring-reading-httpservletrequest-multiple-times
+---
