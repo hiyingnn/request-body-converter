@@ -22,15 +22,19 @@ public class ChildController {
       return childRepository.findAll();
     }
 
-    @GetMapping("child/{childId}")
-    public Optional<Child> getChildById(@PathVariable String childId) {
-      return childRepository.findById(childId);
+    @GetMapping("child/{child}")
+    public Optional<Child> getChildById(Child child, @PathVariable String childId) {
+        log.info(child.toString());
+        return childRepository.findById(childId);
     }
 
     @PostMapping("child")
-    public Child createChild(@RequestBody @Reference(
-      idField = {"parentId"}
-    ) Child child, Parent parent) {
+    public Child createChild(
+            @RequestBody
+            Child child,
+            @Reference(
+            idField = "parentId"
+    ) Parent parent) {
       Child createdChild = childRepository.save(child);
       log.info("Parent found {}", parent);
       log.info("Child created {}", createdChild);
