@@ -24,7 +24,7 @@ class WebConfig implements WebMvcConfigurer {
 
     @Bean
     public DomainClassConverter<FormattingConversionService> domainClassConverter() {
-        return new DomainClassConverter(new FormattingConversionService());
+        return new DomainClassConverter<>(new FormattingConversionService());
     }
 
 }

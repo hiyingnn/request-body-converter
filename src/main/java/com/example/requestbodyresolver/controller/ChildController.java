@@ -1,7 +1,7 @@
 package com.example.requestbodyresolver.controller;
 
 import com.example.requestbodyresolver.domain.Child;
-import com.example.requestbodyresolver.domain.Parent;
+import com.example.requestbodyresolver.domain.ParentAbstract;
 import com.example.requestbodyresolver.repo.ChildRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ public class ChildController {
             Child child,
             @Reference(
             idField = "parentId"
-    ) Parent parent) {
+    ) ParentAbstract parent) {
       Child createdChild = childRepository.save(child);
       log.info("Parent found {}", parent);
       log.info("Child created {}", createdChild);

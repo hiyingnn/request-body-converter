@@ -8,7 +8,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.data.repository.support.DomainClassConverter;
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -17,12 +16,12 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import java.nio.charset.StandardCharsets;
 
-@Component
+//@Component
 @Slf4j
 public class ParentArgumentResolver implements HandlerMethodArgumentResolver {
     private DomainClassConverter<FormattingConversionService> domainClassConverter;
 
-    public ParentArgumentResolver(DomainClassConverter domainClassConverter) {
+    public ParentArgumentResolver(DomainClassConverter<FormattingConversionService> domainClassConverter) {
         this.domainClassConverter = domainClassConverter;
     }
 
